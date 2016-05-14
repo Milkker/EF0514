@@ -14,17 +14,22 @@ namespace EFConsole
     
     public partial class Course
     {
+    	partial void Initialize();
+    
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Course()
         {
             this.Enrollment = new HashSet<Enrollment>();
             this.Person = new HashSet<Person>();
+    
+    		Initialize();
         }
     
         public int CourseID { get; set; }
         public string Title { get; set; }
         public int Credits { get; set; }
         public int DepartmentID { get; set; }
+        public System.DateTime CreatedOn { get; set; }
     
         public virtual Department Department { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
