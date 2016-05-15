@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Entity;
+using System.IO;
 
 namespace EFConsole
 {
@@ -20,61 +22,104 @@ namespace EFConsole
         {
             using (var db = new ContosoUniversityEntities())
             {
+                db.Database.Log = (msg) =>
+                {
+                    File.AppendAllText(@"D:\log.txt", msg);
+                };
+
                 //EF基本操作練習(db);
 
                 //EF基本操作練習2(db);
 
                 //EF類別介紹(db);
 
-                #region 預存程序
+                //預存程序(db);
 
-                //Read
-                var data = db.Get部門名稱與課程數量統計(3);
+                //使用列舉型別(db);
 
-                foreach (var item in data)
+                #region 預先載入
+
+                //取消延遲載入
+                db.Configuration.LazyLoadingEnabled = false;
+
+                //延遲載入
+                //var course1 = db.Course.Where(p => p.CourseType.HasFlag(CourseType.前端));
+
+                //foreach (var item in course1)
+                //{
+                //    Console.WriteLine(item.Title + "\t" + item.Department.Name);
+                //}
+
+                //預先載入
+                //var course2 = db.Course.Include(m => m.Department)
+                //    .Where(p => p.CourseType.HasFlag(CourseType.前端));
+
+                //foreach (var item in course2)
+                //{
+                //    Console.WriteLine(item.Title + "\t" + item.Department.Name);
+                //}
+
+                //動態
+                var course3 = db.Course
+                    .Where(p => p.CourseType.HasFlag(CourseType.前端));
+
+                foreach (var item in course3)
                 {
-                    Console.WriteLine(item.DepartmentID + "\t" + item.Name + "\t" + item.CourseCount);
-                }
-
-                //Create
-                //至Edmx檢視【對應詳細資料】-> 【將實體對應到函式】設定新增時的預存程序。
-                db.Department.Add(new Department()
-                {
-                    Name = "測試",
-                    Budget = 123.45m,
-                    InstructorID = 5//因為預存程序並未處理此欄位，
-                });
-                db.SaveChanges();
-
-                #endregion
-
-                #region 使用列舉型別
-
-                var c = db.Course.Find(1);
-
-                c.CourseType = CourseType.前端;
-
-                c = db.Course.Find(2);
-
-                c.CourseType = CourseType.前端 | CourseType.後端;
-
-                c = db.Course.Find(3);
-
-                c.CourseType = CourseType.前端 | CourseType.後端 | CourseType.全端;
-
-                db.SaveChanges();
-
-                db.Database.Log = Console.WriteLine;
-
-                foreach (var item in db.Course.Where(m=>m.CourseType.HasFlag(CourseType.前端)))
-                {
-                    Console.WriteLine(item.Title + "\t" + item.CourseType);
+                    var refLink = db.Entry(item).Reference(p => p.Department);
+                    if (!refLink.IsLoaded)
+                    {
+                        refLink.Load();
+                    }
+                    Console.WriteLine(item.Title + "\t" + item.Department.Name);
                 }
 
                 #endregion
             }
 
             //離線模式資料操作();
+        }
+
+        private static void 使用列舉型別(ContosoUniversityEntities db)
+        {
+            var c = db.Course.Find(1);
+
+            c.CourseType = CourseType.前端;
+
+            c = db.Course.Find(2);
+
+            c.CourseType = CourseType.前端 | CourseType.後端;
+
+            c = db.Course.Find(3);
+
+            c.CourseType = CourseType.前端 | CourseType.後端 | CourseType.全端;
+
+            db.SaveChanges();
+
+            foreach (var item in db.Course.Where(m => m.CourseType.HasFlag(CourseType.前端)))
+            {
+                Console.WriteLine(item.Title + "\t" + item.CourseType);
+            }
+        }
+
+        private static void 預存程序(ContosoUniversityEntities db)
+        {
+            //Read
+            var data = db.Get部門名稱與課程數量統計(3);
+
+            foreach (var item in data)
+            {
+                Console.WriteLine(item.DepartmentID + "\t" + item.Name + "\t" + item.CourseCount);
+            }
+
+            //Create
+            //至Edmx檢視【對應詳細資料】-> 【將實體對應到函式】設定新增時的預存程序。
+            db.Department.Add(new Department()
+            {
+                Name = "測試",
+                Budget = 123.45m,
+                InstructorID = 5//因為預存程序並未處理此欄位，
+            });
+            db.SaveChanges();
         }
 
         private static void 離線模式資料操作()
@@ -139,8 +184,6 @@ namespace EFConsole
             #endregion
 
             #region DbEntityEntry<T>
-
-            db.Database.Log = Console.WriteLine;//啟用Log
 
             var c = new Course()
             {

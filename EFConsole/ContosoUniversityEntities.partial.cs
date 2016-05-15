@@ -29,5 +29,22 @@ namespace EFConsole
 
             return base.SaveChanges();
         }
+
+
+        protected override System.Data.Entity.Validation.DbEntityValidationResult ValidateEntity(System.Data.Entity.Infrastructure.DbEntityEntry entityEntry, IDictionary<object, object> items)
+        {
+            if (entityEntry.Entity is Course)
+            {
+                if (string.IsNullOrEmpty(entityEntry.CurrentValues.GetValue<string>("Title")))
+                {
+                    var list = new List<System.Data.Entity.Validation.DbValidationError>();
+                    list.Add(new System.Data.Entity.Validation.DbValidationError("Title", "Title 欄位必填"));
+
+                    return new System.Data.Entity.Validation.DbEntityValidationResult(entityEntry, list);
+                }
+            }
+
+            return base.ValidateEntity(entityEntry, items);
+        }
     }
 }
