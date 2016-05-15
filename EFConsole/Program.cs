@@ -23,6 +23,89 @@ namespace EFConsole
                 //EF基本操作練習(db);
 
                 //EF基本操作練習2(db);
+
+                #region DbSet<T>
+
+                //AsNoTracking
+                //var data = db.Course.AsNoTracking();
+
+                //foreach (var item in data)
+                //{
+                //    Console.WriteLine(item.Title);
+                //}
+
+#endregion
+
+                #region DbEntityEntry<T>
+
+                //db.Database.Log = Console.WriteLine;//啟用Log
+
+                //var c = new Course()
+                //{
+                //    Title = "Test",
+                //    Credits = 5,
+                //    DepartmentID = 5
+                //};
+
+                //db.Course.Add(c);
+
+                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+                //db.SaveChanges();
+
+                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+                //c.Credits += 1;
+
+                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+                //db.Course.Remove(c);
+
+                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+                //db.SaveChanges();
+
+                #endregion
+
+                #region DbPropertyValues
+
+                var c = db.Course.Find(7);
+
+                c.Title = "Title 123";
+
+                if (db.Entry(c).State == System.Data.Entity.EntityState.Modified)
+                {
+                    var ce = db.Entry(c);
+                    var v1 = ce.CurrentValues;
+                    var v2 = ce.OriginalValues;
+
+                    Console.WriteLine("\toriginal\tcurrent");
+
+                    //DbPropertyValues.SetValues
+                    v1.SetValues(new
+                    {
+                        Credits = 125
+                    });
+
+                    //DbPropertyValues.GetValue<T>
+                    foreach (var property in ce.OriginalValues.PropertyNames)
+                    {
+                        var current = v1.GetValue<object>(property);
+                        var original = v2.GetValue<object>(property);
+
+                        Console.WriteLine(property);
+                        Console.WriteLine(" original:\t" + original);
+                        Console.WriteLine(" current:\t" + current);
+                    }
+                }
+
+#endregion
+
+                #region 深入了解變更追蹤機制
+
+                //參考 ContosoUniversityEntities.partial.cs
+
+                #endregion
             }
         }
 
