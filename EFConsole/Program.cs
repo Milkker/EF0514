@@ -10,7 +10,7 @@ namespace EFConsole
     {
         public class DepartmentCourse
         {
-            public int  DepartmentID { get; set; }
+            public int DepartmentID { get; set; }
             public string DepartmentName { get; set; }
             public string Title { get; set; }
         }
@@ -24,89 +24,147 @@ namespace EFConsole
 
                 //EF基本操作練習2(db);
 
-                #region DbSet<T>
-
-                //AsNoTracking
-                //var data = db.Course.AsNoTracking();
-
-                //foreach (var item in data)
-                //{
-                //    Console.WriteLine(item.Title);
-                //}
-
-#endregion
-
-                #region DbEntityEntry<T>
-
-                //db.Database.Log = Console.WriteLine;//啟用Log
-
-                //var c = new Course()
-                //{
-                //    Title = "Test",
-                //    Credits = 5,
-                //    DepartmentID = 5
-                //};
-
-                //db.Course.Add(c);
-
-                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
-
-                //db.SaveChanges();
-
-                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
-
-                //c.Credits += 1;
-
-                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
-
-                //db.Course.Remove(c);
-
-                //Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
-
-                //db.SaveChanges();
-
-                #endregion
-
-                #region DbPropertyValues
-
-                var c = db.Course.Find(7);
-
-                c.Title = "Title 123";
-
-                if (db.Entry(c).State == System.Data.Entity.EntityState.Modified)
-                {
-                    var ce = db.Entry(c);
-                    var v1 = ce.CurrentValues;
-                    var v2 = ce.OriginalValues;
-
-                    Console.WriteLine("\toriginal\tcurrent");
-
-                    //DbPropertyValues.SetValues
-                    v1.SetValues(new
-                    {
-                        Credits = 125
-                    });
-
-                    //DbPropertyValues.GetValue<T>
-                    foreach (var property in ce.OriginalValues.PropertyNames)
-                    {
-                        var current = v1.GetValue<object>(property);
-                        var original = v2.GetValue<object>(property);
-
-                        Console.WriteLine(property);
-                        Console.WriteLine(" original:\t" + original);
-                        Console.WriteLine(" current:\t" + current);
-                    }
-                }
-
-#endregion
-
-                #region 深入了解變更追蹤機制
-
-                //參考 ContosoUniversityEntities.partial.cs
-
-                #endregion
+                //EF類別介紹(db);
             }
+
+            //離線模式資料操作();
+        }
+
+        private static void 離線模式資料操作()
+        {
+            #region EF 離線模式(Attach)
+
+            var c = new Course()
+            {
+                CourseID = 7,
+                Title = "123",
+                DepartmentID = 1,
+                Credits = 1
+            };
+
+            using (var db = new ContosoUniversityEntities())
+            {
+                c.Title = "Test1";
+                Console.WriteLine(db.Entry(c).State);
+                db.SaveChanges();
+
+                db.Course.Attach(c);
+                Console.WriteLine(db.Entry(c).State);
+
+                c.Title = "Test2";
+                Console.WriteLine(db.Entry(c).State);
+
+                db.SaveChanges();
+
+                //EF cache Sample
+                var cacheTest = new Course()
+                {
+                    CourseID = 6,
+                    Title = "Cache1",
+                    DepartmentID = 1,
+                    Credits = 1
+                };
+
+            }
+
+            using (var db = new ContosoUniversityEntities())
+            {
+                c.Title = "Test3";
+                db.Entry(c).State = System.Data.Entity.EntityState.Modified;
+                db.SaveChanges();
+            }
+
+            #endregion
+        }
+
+        private static void EF類別介紹(ContosoUniversityEntities db)
+        {
+            #region DbSet<T>
+
+            //AsNoTracking
+            var data = db.Course.AsNoTracking();
+
+            foreach (var item in data)
+            {
+                Console.WriteLine(item.Title);
+            }
+
+            #endregion
+
+            #region DbEntityEntry<T>
+
+            db.Database.Log = Console.WriteLine;//啟用Log
+
+            var c = new Course()
+            {
+                Title = "Test",
+                Credits = 5,
+                DepartmentID = 5
+            };
+
+            db.Course.Add(c);
+
+            Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+            db.SaveChanges();
+
+            Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+            c.Credits += 1;
+
+            Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+            db.Course.Remove(c);
+
+            Console.WriteLine(c.Title + "\t" + db.Entry(c).State);
+
+            db.SaveChanges();
+
+            #endregion
+
+            #region DbPropertyValues
+
+            var c2 = db.Course.Find(7);
+
+            c2.Title = "Title 123";
+
+            if (db.Entry(c2).State == System.Data.Entity.EntityState.Modified)
+            {
+                var ce = db.Entry(c2);
+                var v1 = ce.CurrentValues;
+                var v2 = ce.OriginalValues;
+
+                Console.WriteLine("\toriginal\tcurrent");
+
+                //DbPropertyValues.SetValues
+                v1.SetValues(new
+                {
+                    Credits = 125
+                });
+
+                //DbPropertyValues.GetValue<T>
+                foreach (var property in ce.OriginalValues.PropertyNames)
+                {
+                    var current = v1.GetValue<object>(property);
+                    var original = v2.GetValue<object>(property);
+
+                    Console.WriteLine(property);
+                    Console.WriteLine(" original:\t" + original);
+                    Console.WriteLine(" current:\t" + current);
+                }
+            }
+
+            #endregion
+
+            #region 深入了解變更追蹤機制
+
+            //參考 ContosoUniversityEntities.partial.cs
+            var test = db.Course.Find(7);
+
+            test.Credits += 1;
+            db.SaveChanges();
+
+            #endregion
         }
 
         private static void EF基本操作練習2(ContosoUniversityEntities db)
