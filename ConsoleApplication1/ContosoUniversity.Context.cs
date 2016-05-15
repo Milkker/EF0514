@@ -7,13 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EFConsole
+namespace ConsoleApplication1
 {
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    using System.Data.Entity.Core.Objects;
-    using System.Linq;
     
     public partial class ContosoUniversityEntities : DbContext
     {
@@ -32,16 +30,5 @@ namespace EFConsole
         public virtual DbSet<Enrollment> Enrollment { get; set; }
         public virtual DbSet<OfficeAssignment> OfficeAssignment { get; set; }
         public virtual DbSet<Person> Person { get; set; }
-        public virtual DbSet<vwDepartmentCourse> vwDepartmentCourse { get; set; }
-        public virtual DbSet<vwDeptCourse> vwDeptCourse { get; set; }
-    
-        public virtual ObjectResult<GetDept_Result> Get部門名稱與課程數量統計(Nullable<int> id)
-        {
-            var idParameter = id.HasValue ?
-                new ObjectParameter("id", id) :
-                new ObjectParameter("id", typeof(int));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetDept_Result>("Get部門名稱與課程數量統計", idParameter);
-        }
     }
 }
