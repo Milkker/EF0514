@@ -25,6 +25,53 @@ namespace EFConsole
                 //EF基本操作練習2(db);
 
                 //EF類別介紹(db);
+
+                #region 預存程序
+
+                //Read
+                var data = db.Get部門名稱與課程數量統計(3);
+
+                foreach (var item in data)
+                {
+                    Console.WriteLine(item.DepartmentID + "\t" + item.Name + "\t" + item.CourseCount);
+                }
+
+                //Create
+                //至Edmx檢視【對應詳細資料】-> 【將實體對應到函式】設定新增時的預存程序。
+                db.Department.Add(new Department()
+                {
+                    Name = "測試",
+                    Budget = 123.45m,
+                    InstructorID = 5//因為預存程序並未處理此欄位，
+                });
+                db.SaveChanges();
+
+                #endregion
+
+                #region 使用列舉型別
+
+                var c = db.Course.Find(1);
+
+                c.CourseType = CourseType.前端;
+
+                c = db.Course.Find(2);
+
+                c.CourseType = CourseType.前端 | CourseType.後端;
+
+                c = db.Course.Find(3);
+
+                c.CourseType = CourseType.前端 | CourseType.後端 | CourseType.全端;
+
+                db.SaveChanges();
+
+                db.Database.Log = Console.WriteLine;
+
+                foreach (var item in db.Course.Where(m=>m.CourseType.HasFlag(CourseType.前端)))
+                {
+                    Console.WriteLine(item.Title + "\t" + item.CourseType);
+                }
+
+                #endregion
             }
 
             //離線模式資料操作();

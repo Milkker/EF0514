@@ -15,6 +15,7 @@
           <Property Name="DepartmentID" Type="int" Nullable="false" />
           <Property Name="CreatedOn" Type="datetime" Nullable="false" StoreGeneratedPattern="Computed" />
           <Property Name="ModifiedOn" Type="datetime" />
+          <Property Name="CourseType" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="CourseInstructor">
           <Key>
@@ -178,6 +179,10 @@
         <Function Name="GetDept" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="id" Type="int" Mode="In" />
         </Function>
+        <Function Name="InsertDept" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Name" Type="nvarchar" Mode="In" />
+          <Parameter Name="Budget" Type="decimal" Mode="In" />
+        </Function>
         <EntityContainer Name="ContosoUniversityModelStoreContainer">
           <EntitySet Name="Course" EntityType="Self.Course" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CourseInstructor" EntityType="Self.CourseInstructor" Schema="dbo" store:Type="Tables" />
@@ -244,6 +249,7 @@
           <NavigationProperty Name="Person" Relationship="Self.CourseInstructor" FromRole="Course" ToRole="Person" />
           <Property Name="CreatedOn" Type="DateTime" Nullable="false" Precision="3" annotation:StoreGeneratedPattern="Computed" />
           <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+          <Property Name="CourseType" Type="ContosoUniversityModel.CourseType" Nullable="false" />
         </EntityType>
         <EntityType Name="Department">
           <Key>
@@ -395,7 +401,11 @@
           <EntitySet Name="vwDepartmentCourse" EntityType="ContosoUniversityModel.vwDepartmentCourse" />
           <EntitySet Name="vwDeptCourse" EntityType="ContosoUniversityModel.vwDeptCourse" />
           <FunctionImport Name="Get部門名稱與課程數量統計" ReturnType="Collection(ContosoUniversityModel.GetDept_Result)" >
-            <Parameter Name="id" Mode="In" Type="Int32" />
+          <Parameter Name="id" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="InsertDept">
+            <Parameter Name="Name" Mode="In" Type="String" />
+            <Parameter Name="Budget" Mode="In" Type="Decimal" />
           </FunctionImport>
         </EntityContainer>
         <EntityType Name="vwDepartmentCourse">
@@ -418,6 +428,12 @@
           <Property Type="String" Name="Name" Nullable="true" MaxLength="50" />
           <Property Type="Int32" Name="CourseCount" Nullable="true" />
         </ComplexType>
+        <EnumType Name="CourseType" IsFlags="true">
+          <Member Name="無" Value="0" />
+          <Member Name="前端" Value="1" />
+          <Member Name="後端" Value="2" />
+          <Member Name="全端" Value="4" />
+        </EnumType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -427,6 +443,7 @@
           <EntitySetMapping Name="Course">
             <EntityTypeMapping TypeName="ContosoUniversityModel.Course">
               <MappingFragment StoreEntitySet="Course">
+                <ScalarProperty Name="CourseType" ColumnName="CourseType" />
                 <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
                 <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
                 <ScalarProperty Name="CourseID" ColumnName="CourseID" />
@@ -446,6 +463,14 @@
                 <ScalarProperty Name="InstructorID" ColumnName="InstructorID" />
                 <ScalarProperty Name="RowVersion" ColumnName="RowVersion" />
               </MappingFragment>
+            </EntityTypeMapping>
+            <EntityTypeMapping TypeName="ContosoUniversityModel.Department">
+              <ModificationFunctionMapping>
+                <InsertFunction FunctionName="ContosoUniversityModel.Store.InsertDept">
+                  <ScalarProperty Name="Budget" ParameterName="Budget" />
+                  <ScalarProperty Name="Name" ParameterName="Name" />
+                </InsertFunction>
+              </ModificationFunctionMapping>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Enrollment">
@@ -512,6 +537,7 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="InsertDept" FunctionName="ContosoUniversityModel.Store.InsertDept" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
